@@ -67,6 +67,16 @@ func FloatToString(in float64) (out string) {
 	return
 }
 
+func StringToFloat64(s string) (out float64) {
+    out, _ = strconv.ParseFloat(s, 64)
+    return
+}
+
+func StringToFloat32(s string) (float32) {
+    out, _ := strconv.ParseFloat(s, 32)
+    return float32(out)
+}
+
 func Typeof(v interface{}) string {
     return reflect.TypeOf(v).String()
 }
