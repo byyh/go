@@ -6,7 +6,7 @@ import (
     "io"
     "io/ioutil"
     _"bufio"
-    "github.com/astaxie/beego/logs"
+    "fmt"
 )
 
 
@@ -16,17 +16,18 @@ type File struct {
 }
 
 func (this *File) Open(filename string) bool {
+    fmt.Println("tt110")
     _, err := os.Stat(filename)
     if nil != err {
         if os.IsNotExist(err) {
-            logs.Debug("file is not exists")
+            fmt.Println("file is not exists")
             return this.Create(filename)
         }
     }
 
     this.fp, this.err = os.OpenFile(filename, os.O_RDWR, 0777)
     if this.err != nil {
-        logs.Error("Open", this.err)
+        fmt.Println("Open", this.err)
         return false
     }
 
@@ -34,15 +35,16 @@ func (this *File) Open(filename string) bool {
 }    
 
 func (this *File) Create(filename string) bool {
+    fmt.Println("tt111")
     this.err = os.MkdirAll(FilePath(filename), 0777)
     if(nil != this.err) {
-        logs.Error("Create dir failed:", this.err)
+        fmt.Println("Create dir failed:", this.err)
         return false
     }
 
     this.fp, this.err = os.OpenFile(filename, os.O_CREATE|os.O_RDWR, 0777)
     if(nil != this.err) {
-        logs.Error("Create", this.err)
+        fmt.Println("Create", this.err)
         return false
     }
     
@@ -56,7 +58,7 @@ func (this *File) Close() {
 func (this *File) WriteString(str string) int {
     n, err := this.fp.WriteString(str)
     if(nil != err) {
-        logs.Error("WriteString", err)
+        fmt.Println("WriteString", err)
         return 0
     }
     
@@ -68,7 +70,7 @@ func (this *File) WriteString(str string) int {
 func (this *File) WriteByte(str string) int {
     n, err := this.fp.Write([]byte(str))
     if(nil != err) {
-        logs.Error(err)
+        fmt.Println(err)
         return 0
     }
     
@@ -81,7 +83,7 @@ func (this *File) ReadString(len int) string {
     buf := make([]byte, len)
     _, err := this.fp.Read(buf)
     if err != nil && err != io.EOF {
-        logs.Debug(err)
+        fmt.Println(err)
         return ""
     }
 
