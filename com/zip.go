@@ -2,7 +2,7 @@ package com
 
 import (
 	"fmt"
-	"strconv"
+	_"strconv"
 	"os"
 	"io"
 	"strings"
@@ -40,7 +40,7 @@ func Zip(sourceFile string, destFile string) {
 }
 
 // 解压缩
-func UnZip(zipFile string, destPath string) descNames []string {
+func UnZip(zipFile string, destPath string) (descNames []string) {
 	reader, err := zip.OpenReader(zipFile)
 	CheckErr(err)
 	
@@ -51,8 +51,7 @@ func UnZip(zipFile string, destPath string) descNames []string {
 
 		defer rc.Close()
 
-		textQuoted := strconv.QuoteToASCII(file.Name)
-        filename := textQuoted[1 : len(textQuoted)-1]
+		filename := GbkToUtf8(file.Name)
         filename = strings.Replace(filename, "\\", "", -1)
         filename = destPath + "/" + filename
         
