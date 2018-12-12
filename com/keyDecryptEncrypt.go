@@ -7,6 +7,7 @@ import (
     "crypto/x509"
     "encoding/base64"
     "encoding/pem"
+    "encoding/hex"
     "crypto"
     "errors"    
 )
@@ -57,6 +58,7 @@ func RsaDecrypt(ciphertext []byte, privateKey string) ([]byte, error) {
 }
 
 // hash = crypto.SHA256 or crypto.SHA1
+// 返回的是base64编码
 func SignRsa(src []byte, privateKey string, hash crypto.Hash) (string) {
     var h = hash.New()
     h.Write(src)
@@ -84,6 +86,36 @@ func SignRsa(src []byte, privateKey string, hash crypto.Hash) (string) {
     }
 
     return Base64(retData)
+}
+
+// 返回的是16进制的字符串，不用base64编码
+func SignRsaToHex(src []byte, privateKey string, hash crypto.Hash) (string) {
+    var h = hash.New()
+    h.Write(src)
+    var hashed = h.Sum(nil)
+
+    var err error
+    var block *pem.Block
+    block, _ = pem.Decode([]byte(privateKey))
+    if block == nil {
+        fmt.Println("解析私钥错误")
+        panic(errors.New("private key error"))
+    }
+
+    var prvte *rsa.PrivateKey
+    prvte, err = x509.ParsePKCS1PrivateKey(block.Bytes)
+    if err != nil {
+        fmt.Println("解析私钥错误2")
+        panic(err)
+    }
+
+    retData, err := rsa.SignPKCS1v15(rand.Reader, prvte, hash, hashed)
+    if(nil != err) {
+        fmt.Println("签名错误")
+        panic(err)
+    }
+
+    return hex.EncodeToString(retData)
 }
 
 func CheckSignRsa(src []byte, sign string, publicKey []byte, hash crypto.Hash) bool {
