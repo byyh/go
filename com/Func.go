@@ -1,14 +1,13 @@
 package com
 
 import (
-	"fmt"
-	"strings"
+	"fmt"	
+	"sort"
 	_ "math/rand"
 	"strconv"
-	"reflect"
-	"crypto/md5"
-	"crypto/sha256"
-    "encoding/hex"
+	"reflect"	
+    "net/url" 
+    "encoding/json"
 )
 
 // start从0开始
@@ -81,20 +80,77 @@ func Typeof(v interface{}) string {
     return reflect.TypeOf(v).String()
 }
 
-func Md5(str string) string {
-	h := md5.New()
-    h.Write([]byte(str)) // 需要加密的字符串为 str
-    byteMd5 := h.Sum(nil) 
-    strMd5 := hex.EncodeToString(byteMd5)
+func ClassFieldToSortUrlParameter(refT reflect.Type, refV reflect.Value, filter []string) string {
+	elet := refT.Elem()
+	elev := refV.Elem()
+    num := elet.NumField()
+    keys := []string{}
+    maps := make(map[string]string)
 
-    return strings.ToUpper(strMd5)
+    i := 0;
+    for i < num {
+        field := elet.Field(i)
+        value := elev.Field(i)
+        i++
+        //fmt.Println(field.Name, filter)
+        if InArrayString(filter, field.Name) {
+            continue
+        }
+
+        keys = append(keys, field.Name)
+        maps[field.Name] = url.QueryEscape(value.String())
+    }
+
+    sort.Strings(keys)
+
+    str := ""
+    for _,k := range keys {
+        if "" == str {
+            str = k + "=" +  maps[k]
+        } else {
+            str += "&" + k + "=" +  maps[k]
+        }        
+    }
+
+    return str
 }
 
-func Sha256Code(str string, key string) string {
-    h := sha256.New()
-    h.Write([]byte(str))
-    byteRet := h.Sum([]byte(key))
-    strReg := hex.EncodeToString(byteRet)
+func InArrayString(arr []string, value string) bool {
+    for _, k := range arr {
+        if k == value {
+            return true
+        }
+    }
 
-    return strings.ToUpper(strReg)
+    return false
+}
+
+// json decode
+func JsonDecode(data string) (map[string]interface{}, error) {
+    var tmp interface{}
+    result := make(map[string]interface{})
+
+    err := json.Unmarshal([]byte(data), &tmp) // strings.NewReader(data)
+    if nil != err {
+        return result, err
+    }
+
+    fmt.Println(tmp)
+    maps := tmp.(map[string]interface{})
+    for k, v := range maps {        
+        switch Typeof(v) {
+            case "float64" :
+                result[k] = FloatToString(v.(float64))
+            case "int" :
+                result[k] = strconv.Itoa(v.(int))
+            case "bool" :
+                result[k] = v.(bool)
+            case "string" :
+                result[k] = v.(string)
+            default:   
+                result[k] = v
+        }   
+    }
+
+    return result, nil
 }

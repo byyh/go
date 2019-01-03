@@ -1,15 +1,20 @@
 package com
 
 import (
-    "fmt"
+    "fmt"    
+    "crypto"
+    "errors"  
+    "strings"
+    "crypto/md5"
+    "crypto/sha256"
+    "crypto/hmac"
+    "crypto/sha1" 
     "crypto/rand"
     "crypto/rsa"
     "crypto/x509"
     "encoding/base64"
     "encoding/pem"
     "encoding/hex"
-    "crypto"
-    "errors"    
 )
 
 // 加密
@@ -147,4 +152,45 @@ func CheckSignRsa(src []byte, sign string, publicKey []byte, hash crypto.Hash) b
 
 func Base64(data []byte) string {
     return base64.StdEncoding.EncodeToString(data)
+}
+
+
+func Md5(str string) string {
+    h := md5.New()
+    h.Write([]byte(str)) // 需要加密的字符串为 str
+    byteMd5 := h.Sum(nil) 
+    strMd5 := hex.EncodeToString(byteMd5)
+
+    return strings.ToUpper(strMd5)
+}
+
+func Sha256Code(str string, key string) string {
+    h := sha256.New()
+    h.Write([]byte(str))
+    byteRet := h.Sum([]byte(key))
+    strReg := hex.EncodeToString(byteRet)
+
+    return strings.ToUpper(strReg)
+}
+
+func HmacMd5(data string, key string) string {
+    hmac := hmac.New(md5.New, []byte(key))
+    hmac.Write([]byte(data))
+
+    return Base64(hmac.Sum(nil))
+}
+
+func HmacSha1(data string, key string) string {
+    hmac := hmac.New(sha1.New, []byte(key))
+    hmac.Write([]byte(data))
+
+    return Base64(hmac.Sum(nil))
+}
+ 
+func Sha1(data string, key string) string {
+    sha1 := sha1.New()
+    sha1.Write([]byte(data))
+
+    //return hex.EncodeToString()
+    return Base64(sha1.Sum([]byte(key)))
 }

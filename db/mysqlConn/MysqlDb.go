@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/Go-SQL-Driver/Mysql"
+	_"github.com/Go-SQL-Driver/Mysql"
 )
 
 type MysqlDb struct {
