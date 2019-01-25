@@ -4,10 +4,11 @@ import (
 	"database/sql"
 	"fmt"
 
-	_"github.com/Go-SQL-Driver/Mysql"
+	_ "github.com/Go-SQL-Driver/Mysql"
 )
 
 type MysqlDb struct {
+	dns     string
 	dbptr   *sql.DB
 	conn    *sql.Tx
 	rows    *sql.Rows
@@ -23,13 +24,25 @@ func (db *MysqlDb) checkErr(param ...interface{}) {
 	}
 }
 
+func (db *MysqlDb) IsConnected() {
+	err := db.dbptr.Ping()
+	if err != nil {
+		fmt.Println("PING ERROR: ", err, err.Error())
+		db.Close()
+		db.Open(db.dns)
+	}
+}
+
 func (db *MysqlDb) Open(dns string) {
+	db.dns = dns
 	// "root:111111@tcp(127.0.0.1:3306)/test?charset=utf8"
 	db.dbptr, db.err = sql.Open("mysql", dns)
 	db.checkErr()
 }
 
 func (db *MysqlDb) Query(sqlstr string, args ...interface{}) *sql.Rows {
+	db.IsConnected()
+
 	if nil != db.rows {
 		db.rows.Close()
 	}
@@ -45,6 +58,7 @@ func (db *MysqlDb) Query(sqlstr string, args ...interface{}) *sql.Rows {
 }
 
 func (db *MysqlDb) Query2(sqlstr string, args ...interface{}) *sql.Rows {
+	db.IsConnected()
 
 	if db.IsDebug {
 		fmt.Println(sqlstr, args)
@@ -52,13 +66,15 @@ func (db *MysqlDb) Query2(sqlstr string, args ...interface{}) *sql.Rows {
 
 	rows, err := db.dbptr.Query(sqlstr, args...)
 	db.err = err
-	db.checkErr()	
+	db.checkErr()
 
 	return rows
 }
 
 // update and insert
 func (db *MysqlDb) Exec(sqlstr string, args ...interface{}) bool {
+	db.IsConnected()
+
 	if db.IsDebug {
 		fmt.Println(sqlstr, args)
 	}
@@ -69,15 +85,16 @@ func (db *MysqlDb) Exec(sqlstr string, args ...interface{}) bool {
 
 		return true
 	}
-	
+
 	db.res, db.err = db.conn.Exec(sqlstr, args...)
 	db.checkErr()
-
 
 	return true
 }
 
 func (db *MysqlDb) BeginTrans() {
+	db.IsConnected()
+
 	db.conn, db.err = db.dbptr.Begin()
 	db.checkErr()
 }
