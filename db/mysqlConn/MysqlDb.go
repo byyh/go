@@ -8,12 +8,13 @@ import (
 )
 
 type MysqlDb struct {
-	dns     string
-	dbptr   *sql.DB
-	conn    *sql.Tx
-	rows    *sql.Rows
-	res     sql.Result
-	err     error
+	dns   string
+	dbptr *sql.DB
+	conn  *sql.Tx
+	rows  *sql.Rows
+	res   sql.Result
+	err   error
+
 	IsDebug bool
 }
 
