@@ -158,3 +158,36 @@ func JsonDecode(data string) (map[string]interface{}, error) {
 
 	return result, nil
 }
+
+// 字符串数组列表排序
+// arr 需要排序的字符串列表，该参数传入的是指针，排序后的值会保存在该参数中
+// isForward 排序的方向，true正向从小到大；false反向从大到小
+func SortStringList(arr []string, isForward bool) {
+	length := len(arr)
+	var tmp string
+	var tag bool
+	for j := 0; j < length; j++ {
+		tag = false
+		for k := 0; k < length-j-1; k++ {
+			if isForward {
+				if arr[k] > arr[k+1] {
+					tmp = arr[k]
+					arr[k] = arr[k+1]
+					arr[k+1] = tmp
+					tag = true
+				}
+			} else {
+				if arr[k] < arr[k+1] {
+					tmp = arr[k]
+					arr[k] = arr[k+1]
+					arr[k+1] = tmp
+					tag = true
+				}
+			}
+		}
+
+		if !tag {
+			break
+		}
+	}
+}
