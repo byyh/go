@@ -176,14 +176,14 @@ func HmacMd5(data string, key string) string {
 	hmac := hmac.New(md5.New, []byte(key))
 	hmac.Write([]byte(data))
 
-	return Base64(hmac.Sum(nil))
+	return hex.EncodeToString(hmac.Sum(nil))
 }
 
 func HmacSha1(data string, key string) string {
 	hmac := hmac.New(sha1.New, []byte(key))
 	hmac.Write([]byte(data))
 
-	return Base64(hmac.Sum(nil))
+	return hex.EncodeToString(hmac.Sum(nil))
 }
 
 func Sha1(data string, key string) string {
