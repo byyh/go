@@ -5,7 +5,7 @@ import (
 	"bufio"
 	"encoding/csv"
 	"io"
-	"logs"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
