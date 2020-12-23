@@ -1,59 +1,61 @@
-package com 
+package com
 
-import ( 
-    _"bytes" 
-    "fmt"
-    "strings"
-    "errors"
-    "strconv"
-    "io/ioutil" 
-    "net/http" 
-    //"net/url" 
-    )
+import (
+	_ "bytes"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
+	//"net/url"
+)
 
 type Http struct {
-    Client *http.Client
+	Client *http.Client
 }
 
 func (this *Http) Post(
-    domain string, 
-    data string, 
-    headerMaps map[string]string) (string, error) {  
-    if "" == domain {
-        return "", errors.New("failed: post domain is not empty")
-    }
-    if "" == data {
-        return "", errors.New("failed: post data is not empty")
-    }
+	domain string,
+	data string,
+	headerMaps map[string]string) (string, error) {
+	if "" == domain {
+		return "", errors.New("failed: post domain is not empty")
+	}
+	if "" == data {
+		return "", errors.New("failed: post data is not empty")
+	}
 
-    body := strings.NewReader(data)
+	body := strings.NewReader(data)
 
-    this.Client = &http.Client{}
-  
-    req, _ := http.NewRequest("POST", domain, body)
+	this.Client = &http.Client{}
 
-    for k, v := range headerMaps {
-        //fmt.Println(k, v)
-        req.Header.Set(k, v)
-    }
-    //req.Header.Set("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")
-    //fmt.Println(req)
-    resp, err := this.Client.Do(req)  // 发送    
-    if err != nil { 
-        fmt.Println("failed: 发送失败", err.Error()) 
+	req, _ := http.NewRequest("POST", domain, body)
 
-        return "", err
-    }    
+	for k, v := range headerMaps {
+		//fmt.Println(k, v)
+		req.Header.Set(k, v)
+	}
+	//req.Header.Set("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")
+	//fmt.Println(req)
+	this.Client.Timeout = 2 * time.Second
+	resp, err := this.Client.Do(req) // 发送
+	if err != nil {
+		fmt.Println("failed: 发送失败", err.Error())
 
-    defer resp.Body.Close()      // 关闭resp.Body
+		return "", err
+	}
 
-    if 200 == resp.StatusCode {
-        body, _ := ioutil.ReadAll(resp.Body) 
+	defer resp.Body.Close() // 关闭resp.Body
 
-        return string(body), nil
-    } else {
-        body, _ := ioutil.ReadAll(resp.Body)
+	if 200 == resp.StatusCode {
+		body, _ := ioutil.ReadAll(resp.Body)
 
-        return string(body), errors.New("failed: network error,ret status code=" + strconv.Itoa(resp.StatusCode))
-    }    
+		return string(body), nil
+	} else {
+		body, _ := ioutil.ReadAll(resp.Body)
+
+		return string(body), errors.New("failed: network error,ret status code=" + strconv.Itoa(resp.StatusCode))
+	}
 }
