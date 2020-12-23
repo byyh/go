@@ -56,29 +56,24 @@ func (this *ExportCsv) Remove() {
 	if "" != this.FileName {
 		del := os.Remove(this.FileName)
 		if del != nil {
-			logs.Debug("delete file failed", this.FileName)
+			log.Println("delete file failed", this.FileName)
 		}
 	}
 	if "" != this.ZipFileName {
 		del := os.Remove(this.ZipFileName)
 		if del != nil {
-			logs.Debug("delete file failed", this.ZipFileName)
+			log.Println("delete file failed", this.ZipFileName)
 		}
 	}
 }
 
 // output  controller.Ctx.Output
 func (this *ExportCsv) Download(input *http.Request, output http.ResponseWriter, filename ...string) {
-	if _, err := os.Stat(file); err != nil {
-		http.ServeFile(output, input, file)
-		return
-	}
-
 	var fName string
 	if len(filename) > 0 && filename[0] != "" {
 		fName = filename[0]
 	} else {
-		fName = filepath.Base(file)
+		fName = filepath.Base(filename[0])
 	}
 	//https://tools.ietf.org/html/rfc6266#section-4.3
 	fn := url.PathEscape(fName)
@@ -93,14 +88,14 @@ func (this *ExportCsv) Download(input *http.Request, output http.ResponseWriter,
 		*/
 		fn = "filename=" + fName + "; filename*=utf-8''" + fn
 	}
-	output.Header("Content-Disposition", "attachment; "+fn)
-	output.Header("Content-Description", "File Transfer")
-	output.Header("Content-Type", "application/octet-stream")
-	output.Header("Content-Transfer-Encoding", "binary")
-	output.Header("Expires", "0")
-	output.Header("Cache-Control", "must-revalidate")
-	output.Header("Pragma", "public")
-	http.ServeFile(output, input, file)
+	output.Header().Add("Content-Disposition", "attachment; "+fn)
+	output.Header().Add("Content-Description", "File Transfer")
+	output.Header().Add("Content-Type", "application/octet-stream")
+	output.Header().Add("Content-Transfer-Encoding", "binary")
+	output.Header().Add("Expires", "0")
+	output.Header().Add("Cache-Control", "must-revalidate")
+	output.Header().Add("Pragma", "public")
+	http.ServeFile(output, input, fName)
 }
 
 // 压缩
@@ -158,7 +153,7 @@ func (this *ExportCsv) NetDownload(w http.ResponseWriter, filename ...string) {
 			if f, ok := w.(http.Flusher); ok {
 				f.Flush()
 			} else {
-				logs.Debug("write flusher failed...")
+				log.Println("write flusher failed...")
 				break
 			}
 		}

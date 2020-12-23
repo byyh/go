@@ -102,7 +102,7 @@ func (this *AlipayBase) UrlParse() (strUrlParam string) {
 func (this *AlipayBase) ToXml() string {
 	err := this.CheckParam()
 	if nil != err {
-		logs.Error("ToXml failed", err)
+		logs.Println("ToXml failed", err)
 		panic(err)
 	}
 
