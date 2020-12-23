@@ -12,8 +12,6 @@ import (
 	"path/filepath"
 	_ "strconv"
 	"time"
-
-	"github.com/astaxie/beego/context"
 )
 
 type ExportCsv struct {
